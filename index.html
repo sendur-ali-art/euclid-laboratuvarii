@@ -3,127 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Euclid Laboratuvarı - Yapay Zeka Destekli Geometri</title>
+    <title>Euclid Laboratuvarı</title>
     <script src="https://www.geogebra.org/apps/deployggb.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             display: flex;
+            flex-direction: column;
             height: 100vh;
-            background-color: #f0f2f5;
+            background-color: #f4f4f9;
         }
-        #ggb-container {
-            flex: 2;
-            border-right: 2px solid #ccc;
-            background: white;
+
+        /* ÜST MENÜ (GERİ GELDİ) */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            overflow: hidden; 
+            height: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        #chat-container {
+
+        h1 { margin: 0; font-size: 1.2rem; }
+
+        .header-buttons button {
+            background-color: #34495e;
+            color: white;
+            border: 1px solid #7f8c8d;
+            padding: 5px 15px;
+            margin-left: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .header-buttons button:hover { background-color: #1abc9c; border-color: #16a085; }
+        .header-buttons button.danger:hover { background-color: #e74c3c; border-color: #c0392b; }
+
+        /* ANA GÖVDE */
+        #main-container {
+            display: flex;
             flex: 1;
+            overflow: hidden;
+        }
+
+        /* GEOGEBRA ALANI */
+        #ggb-container {
+            flex: 2; /* Geniş alan */
+            border-right: 1px solid #ccc;
+            position: relative;
+        }
+
+        /* SOHBET ALANI */
+        #chat-panel {
+            flex: 1; /* Dar alan */
             display: flex;
             flex-direction: column;
-            background-color: #fff;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            background: white;
+            max-width: 400px;
+            min-width: 300px;
+            transition: all 0.3s ease;
         }
+        
+        /* Sohbet Gizlendiğinde */
+        #chat-panel.hidden {
+            margin-right: -400px; /* Ekran dışına it */
+        }
+
         #chat-history {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            border-bottom: 1px solid #eee;
+            background-color: #f9f9f9;
         }
+
         .message {
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 10px;
-            max-width: 80%;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
             line-height: 1.4;
+            max-width: 85%;
         }
         .user-message {
-            background-color: #007bff;
+            background-color: #3498db;
             color: white;
             align-self: flex-end;
             margin-left: auto;
         }
         .ai-message {
-            background-color: #e9ecef;
-            color: #333;
-            align-self: flex-start;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
         }
+
         #input-area {
-            padding: 20px;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #ddd;
             display: flex;
             gap: 10px;
-            background-color: #f8f9fa;
         }
         #user-input {
             flex: 1;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 2px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 1rem;
         }
-        button {
+        #user-input:focus { border-color: #3498db; outline: none; }
+        #send-btn {
             padding: 10px 20px;
-            background-color: #28a745;
+            background-color: #27ae60;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
+            font-weight: bold;
         }
-        button:hover {
-            background-color: #218838;
-        }
+        #send-btn:hover { background-color: #2ecc71; }
+
     </style>
 </head>
 <body>
 
-    <div id="ggb-container">
-        <div id="ggbApplet"></div>
-    </div>
+    <header>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>📐</span>
+            <h1>Euclid Laboratuvarı</h1>
+        </div>
+        <div class="header-buttons">
+            <button onclick="toggleChat()">💬 Sohbeti Aç/Kapat</button>
+            <button onclick="downloadGGB()">💾 Kaydet (.ggb)</button>
+            <button class="danger" onclick="resetBoard()">🗑️ Temizle</button>
+        </div>
+    </header>
 
-    <div id="chat-container">
-        <div style="padding: 15px; background: #343a40; color: white; text-align: center;">
-            <h3>Euclid Laboratuvarı</h3>
-            <p style="font-size: 0.8rem; opacity: 0.8;">Sadece Pergel ve Cetvel Kullan!</p>
+    <div id="main-container">
+        <div id="ggb-container">
+            <div id="ggbApplet"></div>
         </div>
-        <div id="chat-history">
-            <div class="message ai-message">
-                Merhaba! Ben Euclid Asistanı. Pergel ve cetvel inşalarında sana rehberlik etmek için buradayım. Ne çizmek istersin?
+
+        <div id="chat-panel">
+            <div id="chat-history">
+                <div class="message ai-message">
+                    Merhaba! Ben Euclid Asistanı. Pergel ve cetvel inşalarında sana rehberlik etmek için buradayım.
+                    <br><br>
+                    <i>(Sol tarafta Cebir Penceresinden noktaların koordinatlarını görebilirsin.)</i>
+                </div>
             </div>
-        </div>
-        <div id="input-area">
-            <input type="text" id="user-input" placeholder="Örn: Bir doğru parçası çiz..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Gönder</button>
+            <div id="input-area">
+                <input type="text" id="user-input" placeholder="Örn: A ve B noktası koy..." onkeypress="handleKeyPress(event)">
+                <button id="send-btn" onclick="sendMessage()">Gönder</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // GeoGebra Parametreleri
+        // --- GEOGEBRA AYARLARI ---
         var parameters = {
             "id": "ggbApplet",
-            "width": 800,
+            "width": 800,  // Başlangıç değeri (CSS ile override edilir)
             "height": 600,
-            "showToolBar": true,
+            "showToolBar": false,        // ARAÇ KUTUSU GİZLENDİ (Temiz Görünüm)
             "borderColor": null,
-            "showMenuBar": true,
-            "showAlgebraInput": true,  
-            "showAlgebraView": true, // CEBİR PENCERESİ AÇIK
-            "allowStyleBar": true,
+            "showMenuBar": false,        // GGB Menüsü Gizli
+            "showAlgebraInput": false,   // Alttaki giriş çubuğu gizli
+            "showAlgebraView": true,     // CEBİR PENCERESİ AÇIK (İstediğin bu)
+            "allowStyleBar": true,       // Renk değiştirme vs. için küçük bar
             "showResetIcon": true,
-            "enableLabelDrags": false,
+            "enableLabelDrags": true,
             "enableShiftDragZoom": true,
-            "enableRightClick": false,
-            "capturingThreshold": null,
-            "showToolBarHelp": false,
-            "errorDialogsActive": true,
-            "useBrowserForJS": false,
-            "appName": "geometry" 
+            "enableRightClick": true,
+            "appName": "geometry"
         };
 
         var applet = new GGBApplet(parameters, true);
@@ -132,7 +186,8 @@
             applet.inject('ggbApplet');
         };
 
-        // Sohbet Geçmişi
+        // --- SOHBET VE BUTON FONKSİYONLARI ---
+
         let chatHistory = [];
 
         async function sendMessage() {
@@ -140,11 +195,9 @@
             const message = inputField.value.trim();
             if (!message) return;
 
-            // Kullanıcı mesajını ekrana bas
             addMessage(message, 'user-message');
             inputField.value = '';
 
-            // Geçmişe ekle
             chatHistory.push({ role: "user", content: message });
 
             try {
@@ -156,24 +209,21 @@
 
                 const data = await response.json();
 
-                // AI Mesajını ekrana bas
                 if (data.message) {
                     addMessage(data.message, 'ai-message');
                     chatHistory.push({ role: "assistant", content: data.message });
                 }
 
-                // GeoGebra komutlarını çalıştır
                 if (data.commands && data.commands.length > 0) {
                     const ggbApp = window.ggbApplet; 
                     data.commands.forEach(cmd => {
-                        console.log("Çalıştırılıyor:", cmd);
                         ggbApp.evalCommand(cmd);
                     });
                 }
 
             } catch (error) {
                 console.error('Hata:', error);
-                addMessage("Bağlantı hatası oluştu.", 'ai-message');
+                addMessage("Sunucuyla iletişim kurulamadı.", 'ai-message');
             }
         }
 
@@ -181,16 +231,40 @@
             const historyDiv = document.getElementById('chat-history');
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${className}`;
-            msgDiv.textContent = text;
+            msgDiv.innerHTML = text; // HTML desteği (Satır başı için)
             historyDiv.appendChild(msgDiv);
             historyDiv.scrollTop = historyDiv.scrollHeight;
         }
 
         function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        // --- ÜST MENÜ BUTONLARI ---
+
+        function resetBoard() {
+            if(confirm("Tüm çizimi silmek istediğine emin misin?")) {
+                ggbApplet.reset();
+                chatHistory = []; // Sohbet hafızasını da sıfırla
+                document.getElementById('chat-history').innerHTML = 
+                    '<div class="message ai-message">Tahta temizlendi. Yeni bir çizime başlayalım!</div>';
             }
         }
+
+        function downloadGGB() {
+            ggbApplet.getBase64(function(base64) {
+                var link = document.createElement('a');
+                link.href = 'data:application/vnd.geogebra.file;base64,' + base64;
+                link.download = 'euclid-calismam.ggb';
+                link.click();
+            });
+        }
+
+        function toggleChat() {
+            const panel = document.getElementById('chat-panel');
+            panel.classList.toggle('hidden');
+        }
+
     </script>
 </body>
 </html>
