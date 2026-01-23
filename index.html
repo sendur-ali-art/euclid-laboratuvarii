@@ -21,7 +21,6 @@
         
         #button-group { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
 
-        /* BUTONLAR */
         .header-btn {
             border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; 
             font-size: 0.75em; color: white; font-weight: bold; transition: opacity 0.3s;
@@ -31,7 +30,6 @@
         .btn-save { background-color: #e67e22; }
         .header-btn:hover { opacity: 0.8; }
 
-        /* SOHBET */
         #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
         #input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: white; }
         
@@ -40,7 +38,6 @@
         button#send-btn:hover { background: #2ecc71; }
         button:disabled { background: #95a5a6; cursor: not-allowed; }
 
-        /* MESAJLAR */
         .message-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .message-wrapper.user { align-self: flex-end; align-items: flex-end; }
         .message-wrapper.ai { align-self: flex-start; align-items: flex-start; }
@@ -53,7 +50,6 @@
         .ai-message { background: #ecf0f1; color: #2c3e50; border-bottom-left-radius: 2px; border: 1px solid #bdc3c7; }
         .system-message { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; align-self: center; width: 90%; text-align: center; font-weight: bold; padding: 10px; border-radius: 10px; margin: auto; }
         
-        /* GEOGEBRA KUTUSU */
         #ggb-container { flex: 1; height: 100vh; position: relative; z-index: 1; }
     </style>
     <script src="https://cdn.geogebra.org/apps/deployggb.js"></script>
@@ -79,20 +75,19 @@
     <div id="ggb-container"></div>
 
     <script>
-        // --- 1. GEOGEBRA AYARLARI ---
         var ggbApp = new GGBApplet({
-            "appName": "classic", // GÜNCELLEME: 'geometry' yerine 'classic' (Denklemler görünsün diye)
-            "perspective": "AG",  // GÜNCELLEME: Algebra (Cebir) + Graphics (Grafik) görünümü zorlandı
+            "appName": "classic", 
+            "perspective": "AG", 
             "width": window.innerWidth - 350, 
             "height": window.innerHeight,      
-            "showToolBar": false,        // Araç çubuğu gizli (Temiz görünüm)
-            "showAlgebraInput": false,   // Giriş satırı gizli
+            "showToolBar": false, 
+            "showAlgebraInput": false, 
             "showMenuBar": false, 
             "showResetIcon": true,
             "language": "tr", 
             "showGrid": true, 
             "showAxes": true,
-            "showAlgebraView": true,     // Cebir penceresi açık
+            "showAlgebraView": true,
             
             "appletOnLoad": function(api) {
                 api.setGridVisible(true);
@@ -101,12 +96,10 @@
             }
         }, true);
 
-        // --- 2. DEĞİŞKENLER ---
         let chatHistory = [];
         let studentName = "";
         let isNameSet = false;
 
-        // --- 3. BAŞLATMA ---
         window.onload = function() {
             ggbApp.inject('ggb-container');
             startUpSequence();
@@ -180,20 +173,21 @@
             }
         }
 
-        // --- KOMUT İŞLEME VE TEMİZLEME ---
+        // --- GÜÇLENDİRİLMİŞ KOMUT TEMİZLEYİCİ ---
         function processCommands(commands) {
             if (!window.ggbAPI) return;
             commands.forEach(cmd => {
                 try {
-                    // Komutun sonundaki JSON artıklarını temizle
-                    let cleanCmd = cmd.replace(/[}\]]/g, "").trim();
+                    // Komutun SONUNDAKİ (}, ], ", boşluk) gibi tüm çöpleri siler.
+                    // Bu Regex, hatadaki 'Intersect(A,B)]}}' sorununu çözer.
+                    let cleanCmd = cmd.replace(/[}\]"'\s]+$/, "");
 
                     if (cleanCmd === "CLEAR_SCREEN") {
                         clearGeoGebra();
                     } else if (cleanCmd === "SCREENSHOT") {
                         takeFullScreenshot(); 
                     } else {
-                        console.log("Çalışan Komut:", cleanCmd);
+                        console.log("GeoGebra'ya Giden:", cleanCmd);
                         window.ggbAPI.evalCommand(cleanCmd);
                     }
                 } catch (e) { console.warn("Komut Hatası:", cmd); }
