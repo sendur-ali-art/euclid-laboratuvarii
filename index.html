@@ -27,7 +27,7 @@
             font-size: 0.75em; color: white; font-weight: bold; transition: opacity 0.3s;
         }
         .btn-photo { background-color: #3498db; }
-        .btn-clear { background-color: #e74c3c; } /* Temizle butonu kırmızımsı */
+        .btn-clear { background-color: #e74c3c; } 
         .btn-save { background-color: #e67e22; }
         .header-btn:hover { opacity: 0.8; }
 
@@ -81,17 +81,18 @@
     <script>
         // --- 1. GEOGEBRA AYARLARI ---
         var ggbApp = new GGBApplet({
-            "appName": "geometry", // GEOMETRİ MODU (Sade arayüz)
+            "appName": "classic", // GÜNCELLEME: 'geometry' yerine 'classic' (Denklemler görünsün diye)
+            "perspective": "AG",  // GÜNCELLEME: Algebra (Cebir) + Graphics (Grafik) görünümü zorlandı
             "width": window.innerWidth - 350, 
             "height": window.innerHeight,      
-            "showToolBar": false, 
-            "showAlgebraInput": false, // Giriş satırı YOK (Öğrenci kod yazamaz)
+            "showToolBar": false,        // Araç çubuğu gizli (Temiz görünüm)
+            "showAlgebraInput": false,   // Giriş satırı gizli
             "showMenuBar": false, 
             "showResetIcon": true,
             "language": "tr", 
             "showGrid": true, 
             "showAxes": true,
-            "showAlgebraView": true, // CEBİR PENCERESİ AÇIK (Noktaları görsünler)
+            "showAlgebraView": true,     // Cebir penceresi açık
             
             "appletOnLoad": function(api) {
                 api.setGridVisible(true);
@@ -179,16 +180,21 @@
             }
         }
 
+        // --- KOMUT İŞLEME VE TEMİZLEME ---
         function processCommands(commands) {
             if (!window.ggbAPI) return;
             commands.forEach(cmd => {
                 try {
-                    if (cmd === "CLEAR_SCREEN") {
+                    // Komutun sonundaki JSON artıklarını temizle
+                    let cleanCmd = cmd.replace(/[}\]]/g, "").trim();
+
+                    if (cleanCmd === "CLEAR_SCREEN") {
                         clearGeoGebra();
-                    } else if (cmd === "SCREENSHOT") {
+                    } else if (cleanCmd === "SCREENSHOT") {
                         takeFullScreenshot(); 
                     } else {
-                        window.ggbAPI.evalCommand(cmd);
+                        console.log("Çalışan Komut:", cleanCmd);
+                        window.ggbAPI.evalCommand(cleanCmd);
                     }
                 } catch (e) { console.warn("Komut Hatası:", cmd); }
             });
