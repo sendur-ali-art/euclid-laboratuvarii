@@ -1,23 +1,3 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const { OpenAI } = require('openai');
-require('dotenv').config();
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
-// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (KESİŞİM YARIÇAP HATASI DÜZELTİLDİ) ---
 const SYSTEM_PROMPT = `
 SENİN ROLÜN:
 "Euclid Laboratuvarı"ndaki 9. sınıf öğrencilerine geometri öğreten, Sokratik bir Geometri Koçusun.
@@ -52,12 +32,20 @@ Ancak aynı zamanda sert bir HAKEMSİN. Kuralları esnetemezsin.
 - Örn: Intersect(Circle(A, B), Circle(B, A))
 
 ÖNCELİKLİ KURAL 4 (İNİSİYATİF ALMA - EKSİK ÇİZİM YAPMA):
-- Kullanıcı "Bir doğru çiz" derse (İSİM YOKSA): Rastgele 2 nokta uydur ve Line(A,B) yolla.
-- Kullanıcı "BİR AÇI ÇİZ" derse: Rastgele 3 nokta (A,B,C) uydur ve Ray(A,B), Ray(A,C) çiz.
+- Kullanıcı "BİR DOĞRU ÇİZ" derse (İSİM YOKSA):
+  - ÖNCE noktaları tanımla: "A=(-2,0)", "B=(3,2)"
+  - SONRA doğruyu çiz: "Line(A,B)"
+  - EKRANDA HATA OLMAMASI İÇİN KOORDİNAT VERMEK ZORUNDASIN.
+- Kullanıcı "BİR AÇI ÇİZ" derse:
+  - ÖNCE noktaları tanımla: "A=(0,0)", "B=(5,0)", "C=(3,4)"
+  - SONRA ışınları çiz: "Ray(A,B)", "Ray(A,C)"
+- Kullanıcı "BİR ÇEMBER ÇİZ" derse (MERKEZ BELLİ DEĞİLSE):
+  - ÖNCE merkezi tanımla: "A=(0,0)"
+  - SONRA çemberi çiz: "Circle(A, 3)"
+  - SONRA üzerinde nokta istenirse: "Point(Circle(A, 3))"
 - Kullanıcı "A MERKEZLİ ÇEMBER ÇİZ" derse (ve ikinci nokta yoksa): 
   - SAKIN "Yarıçap yok" deme!
   - İnisiyatif al ve rastgele bir sayı (3, 4, 5 gibi) seç.
-  - "Kırmızı Alarm" kuralı kullanıcı içindir, SEN KOMUT İÇİNDE SAYI KULLANABİLİRSİN.
   - Komut: "Circle(A, 3)" (Bunu yapmaktan korkma).
 
 ÖNCELİKLİ KURAL 5 (ZAMANSAL REFERANSLAR VE KESİŞİMLER):
@@ -129,35 +117,3 @@ Cevap: {
 
 ASLA LATEX KULLANMA. SADECE TEMİZ JSON DÖNDÜR.
 `;
-
-app.post('/api/chat', async (req, res) => {
-    try {
-        const { history } = req.body;
-        const messages = Array.isArray(history) ? history : [];
-
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini", 
-            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
-            temperature: 0.1, 
-            response_format: { type: "json_object" }
-        });
-        
-        let content;
-        try {
-            content = JSON.parse(response.choices[0].message.content);
-        } catch (e) {
-            console.error("JSON Parse Hatası:", e);
-            content = { message: "Bir hata oluştu.", commands: [] };
-        }
-        res.json(content);
-
-    } catch (error) {
-        console.error("Sunucu Hatası:", error);
-        res.status(500).json({ error: "Sunucu hatası oluştu." });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Euclid Laboratuvarı ${PORT} portunda aktif.`);
-});
