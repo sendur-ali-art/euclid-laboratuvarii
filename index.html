@@ -3,292 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Euclid Laboratuvarı</title>
+    <title>Euclid Laboratuvarı - Yapay Zeka Destekli Geometri</title>
+    <script src="https://www.geogebra.org/apps/deployggb.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background-color: #f0f2f5; overflow: hidden; }
-        
-        /* SOL PANEL */
-        #chat-panel { width: 350px; background: white; display: flex; flex-direction: column; border-right: 1px solid #ccc; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 20; }
-        
-        /* HEADER */
-        #chat-header { 
-            background: #2c3e50; color: white; padding: 15px; 
-            text-align: center; font-weight: bold; font-size: 1.2em; 
-            display: flex; flex-direction: column; gap: 10px;
-            z-index: 30;
-            border-bottom: 3px solid #34495e;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f2f5;
         }
-        
-        #button-group { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
-
-        /* BUTONLAR */
-        .header-btn {
-            border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; 
-            font-size: 0.75em; color: white; font-weight: bold; transition: opacity 0.3s;
+        #ggb-container {
+            flex: 2;
+            border-right: 2px solid #ccc;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; 
         }
-        .btn-photo { background-color: #3498db; }
-        .btn-clear { background-color: #e74c3c; } /* Temizle butonu kırmızımsı */
-        .btn-save { background-color: #e67e22; }
-        .header-btn:hover { opacity: 0.8; }
-
-        /* SOHBET */
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
-        #input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: white; }
-        
-        input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        button#send-btn { padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        button#send-btn:hover { background: #2ecc71; }
-        button:disabled { background: #95a5a6; cursor: not-allowed; }
-
-        /* MESAJLAR */
-        .message-wrapper { display: flex; flex-direction: column; max-width: 85%; }
-        .message-wrapper.user { align-self: flex-end; align-items: flex-end; }
-        .message-wrapper.ai { align-self: flex-start; align-items: flex-start; }
-        .sender-name { font-size: 0.75em; color: #666; margin-bottom: 3px; font-weight: bold; }
-        .user .sender-name { margin-right: 5px; }
-        .ai .sender-name { margin-left: 5px; }
-
-        .message { padding: 10px 15px; border-radius: 15px; font-size: 0.95em; line-height: 1.4; word-wrap: break-word; }
-        .user-message { background: #3498db; color: white; border-bottom-right-radius: 2px; }
-        .ai-message { background: #ecf0f1; color: #2c3e50; border-bottom-left-radius: 2px; border: 1px solid #bdc3c7; }
-        .system-message { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; align-self: center; width: 90%; text-align: center; font-weight: bold; padding: 10px; border-radius: 10px; margin: auto; }
-        
-        /* GEOGEBRA KUTUSU */
-        #ggb-container { flex: 1; height: 100vh; position: relative; z-index: 1; }
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+        #chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .ai-message {
+            background-color: #e9ecef;
+            color: #333;
+            align-self: flex-start;
+        }
+        #input-area {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            background-color: #f8f9fa;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
     </style>
-    <script src="https://cdn.geogebra.org/apps/deployggb.js"></script>
 </head>
 <body>
 
-    <div id="chat-panel">
-        <div id="chat-header">
-            <div>📐 Euclid Laboratuvarı</div>
-            <div id="button-group">
-                <button onclick="takeFullScreenshot()" class="header-btn btn-photo">📷 Kaydet</button>
-                <button onclick="clearGeoGebra()" class="header-btn btn-clear">🧹 Temizle</button>
-                <button onclick="downloadChat()" class="header-btn btn-save">💾 Sohbet</button>
+    <div id="ggb-container">
+        <div id="ggbApplet"></div>
+    </div>
+
+    <div id="chat-container">
+        <div style="padding: 15px; background: #343a40; color: white; text-align: center;">
+            <h3>Euclid Laboratuvarı</h3>
+            <p style="font-size: 0.8rem; opacity: 0.8;">Sadece Pergel ve Cetvel Kullan!</p>
+        </div>
+        <div id="chat-history">
+            <div class="message ai-message">
+                Merhaba! Ben Euclid Asistanı. Pergel ve cetvel inşalarında sana rehberlik etmek için buradayım. Ne çizmek istersin?
             </div>
         </div>
-        <div id="chat-messages"></div>
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Sistem başlatılıyor..." disabled onkeypress="handleKeyPress(event)">
-            <button id="send-btn" disabled onclick="sendMessage()">Gönder</button>
+            <input type="text" id="user-input" placeholder="Örn: Bir doğru parçası çiz..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Gönder</button>
         </div>
     </div>
 
-    <div id="ggb-container"></div>
-
     <script>
-        // --- 1. GEOGEBRA AYARLARI ---
-        var ggbApp = new GGBApplet({
-            "appName": "geometry", // GEOMETRİ MODU (Sade arayüz)
-            "width": window.innerWidth - 350, 
-            "height": window.innerHeight,     
-            "showToolBar": false, 
-            "showAlgebraInput": false, // Giriş satırı YOK (Öğrenci kod yazamaz)
-            "showMenuBar": false, 
+        // GeoGebra Parametreleri
+        var parameters = {
+            "id": "ggbApplet",
+            "width": 800,
+            "height": 600,
+            "showToolBar": true,
+            "borderColor": null,
+            "showMenuBar": true,
+            "showAlgebraInput": true,  
+            "showAlgebraView": true, // CEBİR PENCERESİ AÇIK
+            "allowStyleBar": true,
             "showResetIcon": true,
-            "language": "tr", 
-            "showGrid": true, 
-            "showAxes": true,
-            "showAlgebraView": true, // CEBİR PENCERESİ AÇIK (Noktaları görsünler)
-            
-            "appletOnLoad": function(api) {
-                api.setGridVisible(true);
-                api.setAxesVisible(true, true);
-                window.ggbAPI = api; 
-            }
-        }, true);
-
-        // --- 2. DEĞİŞKENLER ---
-        let chatHistory = [];
-        let studentName = "";
-        let isNameSet = false;
-
-        // --- 3. BAŞLATMA ---
-        window.onload = function() {
-            ggbApp.inject('ggb-container');
-            startUpSequence();
+            "enableLabelDrags": false,
+            "enableShiftDragZoom": true,
+            "enableRightClick": false,
+            "capturingThreshold": null,
+            "showToolBarHelp": false,
+            "errorDialogsActive": true,
+            "useBrowserForJS": false,
+            "appName": "geometry" 
         };
 
-        function startUpSequence() {
-            const messagesDiv = document.getElementById('chat-messages');
-            const inputField = document.getElementById('user-input');
-            const sendBtn = document.getElementById('send-btn');
-            
-            const loadingMsg = document.createElement('div');
-            loadingMsg.className = 'system-message';
-            loadingMsg.textContent = "⏳ Euclid Laboratuvarı Hazırlanıyor...";
-            loadingMsg.id = "startup-loader";
-            messagesDiv.appendChild(loadingMsg);
+        var applet = new GGBApplet(parameters, true);
+        
+        window.onload = function() {
+            applet.inject('ggbApplet');
+        };
 
-            setTimeout(() => {
-                const loader = document.getElementById('startup-loader');
-                if (loader) loader.remove();
-                addMessage("Merhaba! Ben Euclid Laboratuvarı Asistanıyım. İsmin nedir?", "ai");
-                inputField.disabled = false;
-                inputField.placeholder = "Buraya yazın...";
-                sendBtn.disabled = false;
-                inputField.focus();
-            }, 2000);
-        }
+        // Sohbet Geçmişi
+        let chatHistory = [];
 
         async function sendMessage() {
             const inputField = document.getElementById('user-input');
             const message = inputField.value.trim();
-            const sendBtn = document.getElementById('send-btn');
-
             if (!message) return;
 
-            if (!isNameSet) {
-                studentName = message;
-                isNameSet = true;
-            }
-
-            addMessage(message, 'user');
+            // Kullanıcı mesajını ekrana bas
+            addMessage(message, 'user-message');
             inputField.value = '';
-            sendBtn.disabled = true;
 
-            chatHistory.push({ role: "user", content: message, timestamp: new Date() });
+            // Geçmişe ekle
+            chatHistory.push({ role: "user", content: message });
 
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, history: chatHistory.map(h => ({role: h.role, content: h.content})) })
+                    body: JSON.stringify({ history: chatHistory })
                 });
 
-                if (!response.ok) throw new Error('Sunucu hatası');
                 const data = await response.json();
 
+                // AI Mesajını ekrana bas
                 if (data.message) {
-                    addMessage(data.message, 'ai');
-                    chatHistory.push({ role: "assistant", content: JSON.stringify(data), timestamp: new Date() });
+                    addMessage(data.message, 'ai-message');
+                    chatHistory.push({ role: "assistant", content: data.message });
                 }
 
-                if (data.commands && Array.isArray(data.commands)) {
-                    processCommands(data.commands);
+                // GeoGebra komutlarını çalıştır
+                if (data.commands && data.commands.length > 0) {
+                    const ggbApp = window.ggbApplet; 
+                    data.commands.forEach(cmd => {
+                        console.log("Çalıştırılıyor:", cmd);
+                        ggbApp.evalCommand(cmd);
+                    });
                 }
 
             } catch (error) {
-                console.error("Hata:", error);
-                addMessage("⚠️ HATA: Asistana ulaşılamadı.", 'error');
-            } finally {
-                sendBtn.disabled = false;
-                inputField.focus();
+                console.error('Hata:', error);
+                addMessage("Bağlantı hatası oluştu.", 'ai-message');
             }
         }
 
-        function processCommands(commands) {
-            if (!window.ggbAPI) return;
-            commands.forEach(cmd => {
-                try {
-                    if (cmd === "CLEAR_SCREEN") {
-                        clearGeoGebra();
-                    } else if (cmd === "SCREENSHOT") {
-                        takeFullScreenshot(); 
-                    } else {
-                        window.ggbAPI.evalCommand(cmd);
-                    }
-                } catch (e) { console.warn("Komut Hatası:", cmd); }
-            });
+        function addMessage(text, className) {
+            const historyDiv = document.getElementById('chat-history');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.textContent = text;
+            historyDiv.appendChild(msgDiv);
+            historyDiv.scrollTop = historyDiv.scrollHeight;
         }
 
-        function clearGeoGebra() {
-            if(window.ggbAPI) {
-                window.ggbAPI.reset();
-                window.ggbAPI.setGridVisible(true);
-                window.ggbAPI.setAxesVisible(true, true);
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
             }
         }
-
-        function getFormattedDate() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hour = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            return `${day}.${month}.${year}_${hour}.${min}`;
-        }
-
-        async function takeFullScreenshot() {
-            try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ preferCurrentTab: true });
-                const video = document.createElement("video");
-                video.onloadedmetadata = function () {
-                    video.play();
-                    setTimeout(() => {
-                        const canvas = document.createElement("canvas");
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
-                        const ctx = canvas.getContext("2d");
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        
-                        const name = studentName || "Ogrenci";
-                        const fileName = "EuclidLab_" + name + "_" + getFormattedDate() + ".png";
-
-                        const link = document.createElement('a');
-                        link.download = fileName;
-                        link.href = canvas.toDataURL("image/png");
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        stream.getTracks().forEach(track => track.stop());
-                    }, 300); 
-                };
-                video.srcObject = stream;
-            } catch (err) { console.error("Ekran görüntüsü hatası:", err); }
-        }
-
-        function downloadChat() {
-            if (chatHistory.length === 0) { alert("Sohbet boş."); return; }
-            let content = "EUCLID LABORATUVARI SOHBET KAYDI\n";
-            content += "ÖĞRENCİ: " + (studentName || "Belirsiz") + "\n";
-            content += "TARİH: " + new Date().toLocaleString() + "\n================================\n\n";
-
-            chatHistory.forEach(item => {
-                let role = item.role === "user" ? (studentName || "Öğrenci").toUpperCase() : "EUCLID ASİSTANI";
-                let text = item.content;
-                try {
-                    if (item.role === "assistant") {
-                        const j = JSON.parse(item.content);
-                        text = j.message;
-                        if(j.commands && j.commands.length) text += " [KOMUTLAR: " + j.commands.join(", ") + "]";
-                    }
-                } catch (e) {}
-                content += role + ":\n" + text + "\n--------------------------------\n";
-            });
-            
-            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            const name = studentName || "Ogrenci";
-            a.download = "EuclidLab_Sohbet_" + name + "_" + getFormattedDate() + ".txt";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function addMessage(text, sender) {
-            const messagesDiv = document.getElementById('chat-messages');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper ' + (sender === 'user' ? 'user' : 'ai');
-            const name = document.createElement('div');
-            name.className = 'sender-name';
-            name.textContent = sender === 'user' ? (studentName || "Öğrenci") : "Euclid Asistanı";
-            const msg = document.createElement('div');
-            msg.className = 'message ' + (sender === 'user' ? 'user-message' : (sender === 'error' ? 'error-message' : 'ai-message'));
-            msg.textContent = text;
-            if (sender !== 'error') wrapper.appendChild(name);
-            wrapper.appendChild(msg);
-            messagesDiv.appendChild(wrapper);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(); }
-        window.onresize = function() { if(window.ggbApplet) window.ggbApplet.setSize(window.innerWidth - 350, window.innerHeight); };
     </script>
 </body>
 </html>
