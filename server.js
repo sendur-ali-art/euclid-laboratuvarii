@@ -1,3 +1,23 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { OpenAI } = require('openai');
+require('dotenv').config();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (GÜNCELLENDİ: OTO-TANIMLAMA EKLENDİ) ---
 const SYSTEM_PROMPT = `
 SENİN ROLÜN:
 "Euclid Laboratuvarı"ndaki 9. sınıf öğrencilerine geometri öğreten, Sokratik bir Geometri Koçusun.
@@ -117,3 +137,35 @@ Cevap: {
 
 ASLA LATEX KULLANMA. SADECE TEMİZ JSON DÖNDÜR.
 `;
+
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { history } = req.body;
+        const messages = Array.isArray(history) ? history : [];
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini", 
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+            temperature: 0.1, 
+            response_format: { type: "json_object" }
+        });
+        
+        let content;
+        try {
+            content = JSON.parse(response.choices[0].message.content);
+        } catch (e) {
+            console.error("JSON Parse Hatası:", e);
+            content = { message: "Bir hata oluştu.", commands: [] };
+        }
+        res.json(content);
+
+    } catch (error) {
+        console.error("Sunucu Hatası:", error);
+        res.status(500).json({ error: "Sunucu hatası oluştu." });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Euclid Laboratuvarı ${PORT} portunda aktif.`);
+});
