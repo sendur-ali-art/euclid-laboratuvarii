@@ -1,0 +1,18 @@
+{
+  "name": "euclid-laboratuvari",
+  "version": "1.0.0",
+  "description": "Öklid inşaları ve yapay zeka destekli geometri laboratuvarı",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.0",
+    "openai": "^4.28.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
