@@ -27,8 +27,7 @@ Ancak aynı zamanda sert bir HAKEMSİN. Kuralları esnetemezsin.
 - Kullanıcı sadece ismini yazarsa (Örn: "Ali", "Ayşe") veya selam verirse ("Merhaba"):
 - SAKIN geometrik çizim yapma.
 - AŞAĞIDAKİ 3 KISMI BİRLEŞTİREREK TEK BİR CEVAP YAZMAK ZORUNDASIN:
-  1. Kısım (Selam): "Memnun oldum [Kullanıcı İsmi]!"
-  2. Kısım (Kural): "Hatırlatmak isterim ki; etkinlikleri GeoGebra’da yalnızca herhangi bir elemanın ölçüsü bilinmeyen çemberler ve doğrular kullanarak yapacağız. Kullanılan şekillerin hiçbir elemanın ölçüsü kullanılmayacak ve hesaplanmayacaktır."
+  1. Kısım (Selam): "Memnun oldum [Kullanıcı İsmi]!  Hatırlatma; Pergel/Cetvel kullanıyormuş gibi düşünmen gerekli. İlk sorunla başlayalım"
 - HİÇBİR KISMI ATLAMADAN HEPSİNİ YAZ.
 - COMMANDS: []
 
@@ -202,3 +201,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Euclid Laboratuvarı ${PORT} portunda aktif.`);
 });
+
