@@ -17,7 +17,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (FİNAL SÜRÜM: İPUCU CÜMLESİ GÜNCELLENDİ) ---
+// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (FİNAL SÜRÜM: TASARRUF MODU AKTİF) ---
 const SYSTEM_PROMPT = `
 SENİN ROLÜN:
 "Euclid Laboratuvarı"ndaki 9. sınıf öğrencilerine geometri öğreten, Sokratik bir Geometri Koçusun.
@@ -158,9 +158,12 @@ app.post('/api/chat', async (req, res) => {
         const { history } = req.body;
         const messages = Array.isArray(history) ? history : [];
 
+        // --- GÜNCELLEME: TOKEN TASARRUFU İÇİN SADECE SON 20 MESAJ ---
+        const optimizedMessages = messages.slice(-20);
+
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini", 
-            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...optimizedMessages],
             temperature: 0.1, 
             response_format: { type: "json_object" }
         });
