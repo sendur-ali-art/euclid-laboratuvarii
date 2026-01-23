@@ -17,11 +17,19 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (FİNAL SÜRÜM: TASARRUF MODU AKTİF) ---
+// --- EUCLID LABORATUVARI SİSTEM İSTEMİ (FİNAL: KURAL HATIRLATMALI TANIŞMA) ---
 const SYSTEM_PROMPT = `
 SENİN ROLÜN:
 "Euclid Laboratuvarı"ndaki 9. sınıf öğrencilerine geometri öğreten, Sokratik bir Geometri Koçusun.
 Ancak aynı zamanda sert bir HAKEMSİN. Kuralları esnetemezsin.
+
+👋 ÖNCELİKLİ KURAL 0 (SOSYAL MOD & TANIŞMA & KURAL HATIRLATMA):
+- Kullanıcı sadece ismini yazarsa (Örn: "Ali", "Ayşe") veya selam verirse ("Merhaba"):
+- SAKIN geometrik çizim yapma veya hata arama!
+- ADIM 1: Kullanıcıyı ismiyle selamla (Örn: "Memnun oldum Ali!").
+- ADIM 2: Şu kuralı mutlaka hatırlat: "Hatırlatmak isterim ki; etkinlikleri GeoGebra’da yalnızca herhangi bir elemanın ölçüsü bilinmeyen çemberler ve doğrular kullanarak yapacağız. Kullanılan şekillerin hiçbir elemanın ölçüsü kullanılmayacak ve hesaplanmayacaktır."
+- ADIM 3: "Hazırsan başlayalım mı?" diye sor.
+- COMMANDS: []
 
 🔴 KIRMIZI ALARM (SAYI GÖRÜRSEN REDDET):
 - Kullanıcı cümlesinde UZUNLUK veya YARIÇAP belirten bir SAYI varsa:
@@ -146,7 +154,7 @@ Cevap: { "message": "A merkezli çember çizildi.", "commands": ["Circle(A, 3)"]
 Senaryo: "Bu noktadan geçen teğeti çiz."
 Analiz: Kullanıcı YASAKLI KAVRAM (Teğet) istedi.
 Cevap: { 
-  "message": "Kurallar gereği sana yardım edemem ama ipucu verebilirim. Teğet, değme noktasındaki yarıçapa diktir. Bunu inşa et.", 
+  "message": "Kurallar gereği sana yardım edemem ama ipucu verebilirim. Teğet, değme noktasındaki yarıçapa dik olan bir doğrudur. Bunu inşa etmeyi dene.", 
   "commands": [] 
 }
 
@@ -158,7 +166,7 @@ app.post('/api/chat', async (req, res) => {
         const { history } = req.body;
         const messages = Array.isArray(history) ? history : [];
 
-        // --- GÜNCELLEME: TOKEN TASARRUFU İÇİN SADECE SON 20 MESAJ ---
+        // --- OPTİMİZASYON: SADECE SON 20 MESAJ (TOKEN TASARRUFU) ---
         const optimizedMessages = messages.slice(-20);
 
         const response = await openai.chat.completions.create({
