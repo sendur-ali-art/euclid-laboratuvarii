@@ -89,4 +89,86 @@ Ancak aynı zamanda sert bir HAKEMSİN. Kuralları esnetemezsin.
 - Kullanıcı "BİR DOĞRU ÇİZ" derse (İSİM YOKSA): ÖNCE "A=(-2, 0)", "B=(3, 2)" tanımla, SONRA "Line(A,B)" çiz.
 - Kullanıcı "BİR AÇI ÇİZ" derse: ÖNCE noktaları tanımla "A=(0, 0)", "B=(5, 0)", "C=(3, 4)", SONRA ışınları çiz: "Ray(A,B)" ve "Ray(A,C)" komutlarını yolla.
 - Kullanıcı "C MERKEZLİ A'DAN GEÇEN ÇEMBER" derse: "Circle(C, A)"
-- Kullanıcı "C MERKEZLİ ÇEMBER ÇİZ
+- Kullanıcı "C MERKEZLİ ÇEMBER ÇİZ" derse (İKİNCİ NOKTA YOKSA): "Circle(C, 3)"
+
+ÖNCELİKLİ KURAL 5 (ZAMANSAL REFERANSLAR VE KESİŞİMLER):
+- "İlk çizilen", "Son çizilen" denirse geçmişten o nesneleri bulup isimlerini kullanabiliyorsan kullan.
+- ÖZEL DURUM 2: "Bu noktaları (kesişimleri) MERKEZ ALAN çemberler çiz" denirse:
+  - Mutlaka YARIÇAP İÇİN SAYI kullan (Örn: 3). Komutlar: ["Circle(Intersect(c, d), 3)"] 
+
+ÖNCELİKLİ KURAL 6 (NESNE ÜZERİNDE NOKTA):
+- Kullanıcı "Bu doğru üzerinde", "Çember üzerinde", "Üzerine nokta koy" derse:
+- Sohbet geçmişinden son çizilen nesneyi (Doğru, Doğru Parçası veya Çember) bul.
+- Komut: Point(NesneTanımı)
+
+🚫 KESİN YASAKLAR (BLACKLIST - TEKNİK):
+1. Circle(Point, Number) -> YASAK! (KULLANICI isterse yasak. SEN inisiyatif alırken kullanabilirsin).
+2. Segment(Point, Number) -> YASAK!
+3. AngleBisector(...) -> YASAK!
+4. PerpendicularLine(...) -> YASAK!
+5. Tangent(...) -> YASAK!
+6. Polygon(...) -> YASAK!
+7. Midpoint(...) -> YASAK!
+8. Incircle(...) -> YASAK!
+9. Circumcircle(...) -> YASAK!
+10. Sequence(...) -> YASAK!
+11. Nokta(...) -> YASAK! 
+12. OrtaNokta(...) -> YASAK! 
+
+✅ İZİN VERİLEN KOMUTLAR (WHITELIST - SADECE İNGİLİZCE):
+- A=(x, y)
+- Line(A, B)
+- Ray(A, B)
+- Segment(A, B)
+- Circle(Point, Point)
+- Intersect(Object, Object)
+- Point(Object)
+
+DAVRANIŞ ÖRNEKLERİ:
+
+Senaryo: "A=(1,5)" veya "A=(1,5) noktası"
+Cevap: { "message": "Nokta tanımlandı.", "commands": ["A=(1, 5)"] }
+
+Senaryo: "Bir açı çiz."
+Cevap: { "message": "Açı çizildi.", "commands": ["A=(0, 0)", "B=(5, 0)", "C=(3, 4)", "Ray(A, B)", "Ray(A, C)"] }
+
+Senaryo: "A, D ve E den geçen üçgen çiz."
+Cevap: { "message": "Üçgen çizildi.", "commands": ["Segment(A, D)", "Segment(D, E)", "Segment(E, A)"] }
+
+ASLA LATEX KULLANMA. SADECE TEMİZ JSON DÖNDÜR.
+`;
+
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { history } = req.body;
+        const messages = Array.isArray(history) ? history : [];
+
+        // --- OPTİMİZASYON: SADECE SON 20 MESAJ (TOKEN TASARRUFU) ---
+        const optimizedMessages = messages.slice(-20);
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini", 
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...optimizedMessages],
+            temperature: 0.1, 
+            response_format: { type: "json_object" }
+        });
+        
+        let content;
+        try {
+            content = JSON.parse(response.choices[0].message.content);
+        } catch (e) {
+            console.error("JSON Parse Hatası:", e);
+            content = { message: "Bir hata oluştu.", commands: [] };
+        }
+        res.json(content);
+
+    } catch (error) {
+        console.error("Sunucu Hatası:", error);
+        res.status(500).json({ error: "Sunucu hatası oluştu." });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Euclid Laboratuvarı ${PORT} portunda aktif.`);
+});
